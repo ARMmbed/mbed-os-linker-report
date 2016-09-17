@@ -1,0 +1,28 @@
+From a4d27dc5a948329e38f954acec7f208e0bbeafbe Mon Sep 17 00:00:00 2001
+From: Milosch Meriac <milosch@meriac.com>
+Date: Sat, 17 Sep 2016 17:17:50 +0100
+Subject: [PATCH] GCC: Always enable debug information
+
+---
+ tools/toolchains/gcc.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tools/toolchains/gcc.py b/tools/toolchains/gcc.py
+index 27bc11f..35f4da4 100644
+--- a/tools/toolchains/gcc.py
++++ b/tools/toolchains/gcc.py
+@@ -91,10 +91,10 @@ class GCC(mbedToolchain):
+             self.flags["common"].append("-save-temps")
+ 
+         if "debug-info" in self.options:
+-            self.flags["common"].append("-g")
+             self.flags["common"].append("-O0")
+         else:
+             self.flags["common"].append("-Os")
++        self.flags["common"].append("-g")
+ 
+         main_cc = join(tool_path, "arm-none-eabi-gcc")
+         main_cppc = join(tool_path, "arm-none-eabi-g++")
+-- 
+2.7.4
+
