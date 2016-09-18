@@ -1,6 +1,6 @@
 body {
   font-family: 'Open Sans', sans-serif;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 400;
   background-color: #fff;
   width: 960px;
@@ -24,7 +24,7 @@ body {
 }
 
 #legend {
-  padding: 10px 0 0 3px;
+  padding: 50px 0 0 3px;
 }
 
 #sequence text, #legend text {
@@ -42,8 +42,8 @@ body {
 
 #explanation {
   position: absolute;
-  top: 260px;
-  left: 305px;
+  top: 360px;
+  left: 570px;
   width: 140px;
   text-align: center;
   color: #666;

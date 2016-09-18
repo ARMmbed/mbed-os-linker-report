@@ -1,21 +1,21 @@
 // Dimensions of sunburst.
-var width = 750;
-var height = 600;
+var width = 1280;
+var height = 800;
 var radius = Math.min(width, height) / 2;
 
 // Breadcrumb dimensions: width, height, spacing, width of tip/tail.
 var b = {
-  w: 75, h: 30, s: 3, t: 10
+  w: 100, h: 30, s: 3, t: 10
 };
 
 // Mapping of step names to colors.
 var colors = {
-  "home": "#5687d1",
-  "product": "#7b615c",
-  "search": "#de783b",
-  "account": "#6ab975",
-  "other": "#a173d1",
-  "end": "#bbbbbb"
+  ".bss": "#5687d1",
+  ".data": "#7b615c",
+  ".uvisor.bss": "#de783b",
+  ".uvisor.secure": "#6ab975",
+  ".page_heap": "#a173d1",
+  ".text": "#bbbbbb"
 };
 
 // Total size of all segments; we set this later, after loading the data.
@@ -38,21 +38,12 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.sqrt(d.y); })
     .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-// Use d3.text and d3.csv.parseRows so that we do not need to have a header
-// row, and can receive the csv as an array of arrays.
-d3.text("visit-sequences.csv", function(text) {
-  var csv = d3.csv.parseRows(text);
-  var json = buildHierarchy(csv);
-  createVisualization(json);
-});
-
-// Main function to draw and set up the visualization, once we have the data.
-function createVisualization(json) {
+d3.json("data-flare.json", function(error, json) {
+  if (error) throw error;
 
   // Basic setup of page elements.
   initializeBreadcrumbTrail();
   drawLegend();
-  d3.select("#togglelegend").on("click", toggleLegend);
 
   // Bounding circle underneath the sunburst, to make it easier to detect
   // when the mouse leaves the parent g.
@@ -72,7 +63,9 @@ function createVisualization(json) {
       .attr("display", function(d) { return d.depth ? null : "none"; })
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
-      .style("fill", function(d) { return colors[d.name]; })
+      .style("fill", function(d) {
+           return (d.depth>1) ? '#0B4C5F' : colors[d.name];
+       })
       .style("opacity", 1)
       .on("mouseover", mouseover);
 
@@ -81,7 +74,7 @@ function createVisualization(json) {
 
   // Get total size of the tree = value of root node from partition.
   totalSize = path.node().__data__.value;
- };
+});
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
 function mouseover(d) {
@@ -93,7 +86,10 @@ function mouseover(d) {
   }
 
   d3.select("#percentage")
-      .text(percentageString);
+      .text(d.value);
+
+  d3.select("#percentage_desc")
+      .text(d.name);
 
   d3.select("#explanation")
       .style("visibility", "");
@@ -187,7 +183,9 @@ function updateBreadcrumbs(nodeArray, percentageString) {
 
   entering.append("svg:polygon")
       .attr("points", breadcrumbPoints)
-      .style("fill", function(d) { return colors[d.name]; });
+      .style("fill", function(d) {
+          return (d.depth>1) ? '#99AA99' : colors[d.name];
+       });
 
   entering.append("svg:text")
       .attr("x", (b.w + b.t) / 2)
@@ -198,7 +196,7 @@ function updateBreadcrumbs(nodeArray, percentageString) {
 
   // Set position for entering and updating nodes.
   g.attr("transform", function(d, i) {
-    return "translate(" + i * (b.w + b.s) + ", 0)";
+    return "translate(" + (i+0.2) * (b.w + b.s) + ", 0)";
   });
 
   // Remove exiting nodes.
@@ -250,56 +248,3 @@ function drawLegend() {
       .attr("text-anchor", "middle")
       .text(function(d) { return d.key; });
 }
-
-function toggleLegend() {
-  var legend = d3.select("#legend");
-  if (legend.style("visibility") == "hidden") {
-    legend.style("visibility", "");
-  } else {
-    legend.style("visibility", "hidden");
-  }
-}
-
-// Take a 2-column CSV and transform it into a hierarchical structure suitable
-// for a partition layout. The first column is a sequence of step names, from
-// root to leaf, separated by hyphens. The second column is a count of how 
-// often that sequence occurred.
-function buildHierarchy(csv) {
-  var root = {"name": "root", "children": []};
-  for (var i = 0; i < csv.length; i++) {
-    var sequence = csv[i][0];
-    var size = +csv[i][1];
-    if (isNaN(size)) { // e.g. if this is a header row
-      continue;
-    }
-    var parts = sequence.split("-");
-    var currentNode = root;
-    for (var j = 0; j < parts.length; j++) {
-      var children = currentNode["children"];
-      var nodeName = parts[j];
-      var childNode;
-      if (j + 1 < parts.length) {
-   // Not yet at the end of the sequence; move down the tree.
- 	var foundChild = false;
- 	for (var k = 0; k < children.length; k++) {
- 	  if (children[k]["name"] == nodeName) {
- 	    childNode = children[k];
- 	    foundChild = true;
- 	    break;
- 	  }
- 	}
-  // If we don't already have a child node for this branch, create it.
- 	if (!foundChild) {
- 	  childNode = {"name": nodeName, "children": []};
- 	  children.push(childNode);
- 	}
- 	currentNode = childNode;
-      } else {
- 	// Reached the end of the sequence; create a leaf node.
- 	childNode = {"name": nodeName, "size": size};
- 	children.push(childNode);
-      }
-    }
-  }
-  return root;
-};

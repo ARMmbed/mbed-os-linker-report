@@ -24,7 +24,6 @@ map_sort();
 
 /* output results */
 file_put_contents(FILE_OUT_FLARE, json_encode($dir));
-//file_put_contents(FILE_OUT_FLARE, 'flare = '.json_encode($dir).';');
 
 function map_set_dir_size($section, $filename, $objname, $size)
 {
@@ -80,6 +79,10 @@ function map_process($mapfile)
         $obj->Type = $val[3];
         $obj->Size = hexdec($val[4]);
         $obj->Section = trim($file[0]);
+
+        if(!$obj->Size)
+            continue;
+
         if(isset($file[1]))
         {
             $file = explode(':', trim($file[1]));
@@ -95,6 +98,14 @@ function map_process($mapfile)
                 $obj->Size
             );
         }
+        else
+            map_set_dir_size(
+                $obj->Section,
+                './libc',
+                $obj->Name,
+                $obj->Size
+            );
+
         $obj->Source = $mapfile;
 
         if(isset($seg[$obj->Section]))
