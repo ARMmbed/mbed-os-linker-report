@@ -34,5 +34,7 @@ php ../mbed-os-linker-report/elfsize.php ./.build/K64F/GCC_ARM/mbed-os-example-b
 # Display results in chrome
 chrome --allow-file-access-from-files ../mbed-os-linker-report/html/index.html
 ```
+The output is a JSON file in the `html` directory - by copying the `html` directory to a web server, the tool can run without the command line option mentioned for Chrome. 
+
 ### Example Output
 ![d3.js based ELF Linker Statistics](docs/example.png)
