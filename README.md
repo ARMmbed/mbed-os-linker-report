@@ -34,7 +34,7 @@ mbed compile -m K64F -t GCC_ARM -c
 # Process Data: provide one or more elf files for analysis
 php ../mbed-os-linker-report/elfsize.php ./.build/K64F/GCC_ARM/mbed-os-example-blinky.elf > ../mbed-os-linker-report/html/data-flare.json
 # Display results in chrome
-chrome --allow-file-access-from-files ../mbed-os-linker-report/html/index.html
+chrome --allow-file-access-from-files ../mbed-os-linker-report/index.html
 ```
 The output is a JSON file in the `html` directory - by copying the `html` directory to a web server, the tool can run without the command line option mentioned for Chrome. 
 
