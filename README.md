@@ -1,5 +1,5 @@
 # d3.js based ELF Linker Statistics
-This repository is used to generate interactive linker statistics. Please have a look at our [example section](docs).
+This repository is used to generate interactive linker statistics. Please have a look at our [interactive example](https://armmbed.github.io/mbed-os-linker-report/).
 
 
 ## Step-By-Step instructions
@@ -39,4 +39,5 @@ chrome --allow-file-access-from-files ../mbed-os-linker-report/index.html
 The output is a JSON file in the `html` directory - by copying the `html` directory to a web server, the tool can run without the command line option mentioned for Chrome. 
 
 ### Example Output
+Below you can find an example screenshot of our tool. Please have a look at our [interactive example](https://armmbed.github.io/mbed-os-linker-report/), too.
 ![d3.js based ELF Linker Statistics](docs/example.png)
