@@ -30,7 +30,7 @@ $dir['children'] = array();
 
 /* filter file names */
 $directory_map = array(
-    getcwd().'/target/' => '',
+    getcwd().'/' => '',
     'mbed-os/features/FEATURE_UVISOR/importer/TARGET_IGNORE/uvisor/./' => './uvisor/',
     'HAL_CM4.S' => './mbed-os/rtos/rtx/TARGET_CORTEX_M/TARGET_RTOS_M4_M7/TOOLCHAIN_IAR/HAL_CM4.S',
 );
