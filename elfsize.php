@@ -1,7 +1,25 @@
 #!/usr/bin/env php
 <?php
+/*
+ * Copyright (c) 2016, ARM Limited, All Rights Reserved
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-define('FILE_OUT_FLARE', 'html/data-flare.json');
+define('TOOL_PREFIX', 'arm-none-eabi-');
+define('TOOL_NM_BIN', TOOL_PREFIX.'nm');
+define('TOOL_NM_PAR', ' -l -S -C -f sysv ');
 
 $map = array();
 $seg = array();
@@ -17,13 +35,28 @@ $directory_map = array(
     'HAL_CM4.S' => './mbed-os/rtos/rtx/TARGET_CORTEX_M/TARGET_RTOS_M4_M7/TOOLCHAIN_IAR/HAL_CM4.S',
 );
 
-/* process both map files */
-map_process('main.map');
-map_process('uvisor.map');
-map_sort();
+/* show help */
+if($argc == 1)
+{
+    fprintf(stderr, "usage: $argv[0] file1.elf ... fileN.elf".PHP_EOL);
+    exit(1);
+}
 
-/* output results */
-file_put_contents(FILE_OUT_FLARE, json_encode($dir));
+/* process all command line arguments - elf files */
+unset($argv[0]);
+foreach($argv as $elf_file)
+    if(is_readable($elf_file))
+        map_process($elf_file);
+    else
+    {
+        fprintf(STDERR, "ERROR: unable to read from '$elf_file'".PHP_EOL);
+        exit(2);
+    }
+
+/* sort resulting maps ... */
+map_sort();
+/* ... and output results */
+echo json_encode($dir);
 
 function map_set_dir_size($section, $filename, $objname, $size)
 {
@@ -55,12 +88,25 @@ function map_set_dir_size($section, $filename, $objname, $size)
     }
 }
 
-function map_process($mapfile)
+function map_process($elffile)
 {
     global $map, $seg, $directory_map;
 
-    if(($content = file($mapfile))===FALSE)
-        return FALSE;
+    /* run NM on the elf file provided */
+    $res = FALSE;
+    $content = array();
+    exec(
+        escapeshellcmd(TOOL_NM_BIN).TOOL_NM_PAR.escapeshellarg($elffile),
+        $content,
+        $res
+    );
+    if($res)
+    {
+        fprintf(STDERR, "ERROR: failed to process '$elffile' using '".TOOL_NM_BIN."'".PHP_EOL);
+        exit($res);
+    }
+
+    /* process each line of the NM-output */
     foreach($content as $line)
     {
         $line = explode('|',$line);
@@ -106,7 +152,7 @@ function map_process($mapfile)
                 $obj->Size
             );
 
-        $obj->Source = $mapfile;
+        $obj->Source = $elffile;
 
         if(isset($seg[$obj->Section]))
             $seg[$obj->Section] += $obj->Size;
