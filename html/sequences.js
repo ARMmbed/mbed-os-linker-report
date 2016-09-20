@@ -38,7 +38,7 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.sqrt(d.y); })
     .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-d3.json("data-flare.json", function(error, json) {
+d3.json("html/data-flare.json", function(error, json) {
   if (error) throw error;
 
   // Basic setup of page elements.
