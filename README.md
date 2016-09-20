@@ -23,3 +23,5 @@ php ../mbed-os-linker-report/elfsize.php ./.build/K64F/GCC_ARM/mbed-os-example-b
 # Display results in chrome
 chrome --allow-file-access-from-files ../mbed-os-linker-report/html/index.html
 ```
+### Example Output
+![d3.js based ELF Linker Statistics](docs/example.png)
