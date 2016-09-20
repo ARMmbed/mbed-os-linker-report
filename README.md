@@ -1,4 +1,6 @@
 # d3.js based ELF Linker Statistics
+This repository is used to generate interactive linker statistics. Please have a look at our [example section](docs).
+
 
 ## Step-By-Step instructions
 ### Chrome Users
