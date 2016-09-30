@@ -42,15 +42,15 @@ The output is a JSON file in the `html` directory - by copying the `html` direct
 For uVisor the statistics of two ELF files need to be combined into a single JSON file. This is how it works:
 ```bash
 # Download latest version of a uVisor enabled app
-mbed import mbed-os-example-uvisor-irq
+mbed import mbed-os-example-uvisor
 # Change into that directory
-cd mbed-os-example-uvisor-irq
-# Recompile uVisor - the command below needs to run twice due to a Makefile bug 
+cd mbed-os-example-uvisor
+# Recompile uVisor - the command below needs to run twice due to a Makefile bug
 make -C mbed-os/features/FEATURE_UVISOR/importer
 # Recompile mbed-os app
 mbed compile -m K64F -t GCC_ARM -c
 # Combine both elf outputs into a singe JSON file
-../mbed-os-linker-report/elfsize.php mbed-os/features/FEATURE_UVISOR/importer/TARGET_IGNORE/uvisor/platform/kinetis/release/configuration_kinetis_cortex_m4_0x1fff0000.elf .build/K64F/GCC_ARM/mbed-os-example-uvisor-irq.elf > ../mbed-os-linker-report/html/data-flare.json 
+../mbed-os-linker-report/elfsize.php mbed-os/features/FEATURE_UVISOR/importer/TARGET_IGNORE/uvisor/platform/kinetis/release/configuration_kinetis_cortex_m4_0x1fff0000.elf .build/K64F/GCC_ARM/mbed-os-example-uvisor.elf > ../mbed-os-linker-report/html/data-flare.json
 ```
 
 ### Example Output
