@@ -38,7 +38,7 @@ $directory_map = array(
 /* show help */
 if($argc == 1)
 {
-    fprintf(stderr, "usage: $argv[0] file1.elf ... fileN.elf".PHP_EOL);
+    fprintf(STDERR, "usage: $argv[0] file1.elf ... fileN.elf".PHP_EOL);
     exit(1);
 }
 
