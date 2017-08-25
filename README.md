@@ -9,15 +9,6 @@ This step is only needed once.
 git clone https://github.com/ARMmbed/mbed-os-linker-report
 ```
 ### Downloading your target
-As debug information is currently not enabled for mbedOS release builds, we need to manually add that option to the tool source code. After merging the outstanding mbed-os pull request [#2733](https://github.com/ARMmbed/mbed-os/pull/2733), the patch can be avoided.
-```bash
-# Download project
-mbed import mbed-os-example-blinky
-# Change into the project directory
-cd mbed-os-example-blinky
-# Applying patch for ARM_GCC: Always enable debug information
-git -C mbed-os am ../../mbed-os-linker-report/patches/0001-GCC-Always-enable-debug-information.patch
-```
 
 The elfsize script is implemented as a PHP shell script. You need to install PHP locally for running the script:
 - Dowload [installer](http://windows.php.net/download/) for Microsoft Windows
