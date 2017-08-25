@@ -3,8 +3,6 @@ This repository is used to generate interactive linker statistics. Please have a
 
 
 ## Step-By-Step instructions
-### Chrome Users
-Please make sure to run chrome with the option `--allow-file-access-from-files` to enable local display of the statistics.
 ## Installing this tool
 This step is only needed once.
 ```bash
@@ -32,11 +30,10 @@ For performing the analysis, you need to recompile your program:
 # Recompile project for chosen platform
 mbed compile -m K64F -t GCC_ARM -c
 # Process Data: provide one or more elf files for analysis
-php ../mbed-os-linker-report/elfsize.php ./.build/K64F/GCC_ARM/mbed-os-example-blinky.elf > ../mbed-os-linker-report/html/data-flare.json
-# Display results in chrome
-chrome --allow-file-access-from-files ../mbed-os-linker-report/index.html
+php ../mbed-os-linker-report/elfsize.php ./.build/K64F/GCC_ARM/mbed-os-example-blinky.elf > ../mbed-os-linker-report/html/data-flare.js
 ```
-The output is a JSON file in the `html` directory - by copying the `html` directory to a web server, the tool can run without the command line option mentioned for Chrome. 
+
+Now open `../mbed-os-linker-report/index.html` in your web browser.
 
 ### Advanced example for uVisor statistics
 For uVisor the statistics of two ELF files need to be combined into a single JSON file. This is how it works:
@@ -50,7 +47,7 @@ make -C mbed-os/features/FEATURE_UVISOR/importer
 # Recompile mbed-os app
 mbed compile -m K64F -t GCC_ARM -c
 # Combine both elf outputs into a singe JSON file
-../mbed-os-linker-report/elfsize.php mbed-os/features/FEATURE_UVISOR/importer/TARGET_IGNORE/uvisor/platform/kinetis/release/configuration_kinetis_cortex_m4_0x1fff0000.elf .build/K64F/GCC_ARM/mbed-os-example-uvisor.elf > ../mbed-os-linker-report/html/data-flare.json
+../mbed-os-linker-report/elfsize.php mbed-os/features/FEATURE_UVISOR/importer/TARGET_IGNORE/uvisor/platform/kinetis/release/configuration_kinetis_cortex_m4_0x1fff0000.elf .build/K64F/GCC_ARM/mbed-os-example-uvisor.elf > ../mbed-os-linker-report/html/data-flare.js
 ```
 
 ### Example Output

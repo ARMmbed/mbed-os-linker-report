@@ -19,7 +19,7 @@ var colors = {
 };
 
 // Total size of all segments; we set this later, after loading the data.
-var totalSize = 0; 
+var totalSize = 0;
 
 var vis = d3.select("#chart").append("svg:svg")
     .attr("width", width)
@@ -38,7 +38,7 @@ var arc = d3.svg.arc()
     .innerRadius(function(d) { return Math.sqrt(d.y); })
     .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
 
-d3.json("html/data-flare.json", function(error, json) {
+(function(error, json) {
   if (error) throw error;
 
   // Basic setup of page elements.
@@ -74,7 +74,7 @@ d3.json("html/data-flare.json", function(error, json) {
 
   // Get total size of the tree = value of root node from partition.
   totalSize = path.node().__data__.value;
-});
+})(null, mbed_map);
 
 // Fade all but the current sequence, and show it in the breadcrumb trail.
 function mouseover(d) {
