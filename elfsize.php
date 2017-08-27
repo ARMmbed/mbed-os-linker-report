@@ -56,7 +56,7 @@ foreach($argv as $elf_file)
 /* sort resulting maps ... */
 map_sort();
 /* ... and output results */
-echo json_encode($dir);
+echo 'var mbed_map = ' . json_encode($dir);
 
 function map_set_dir_size($section, $filename, $objname, $size)
 {
@@ -171,7 +171,7 @@ function map_sort_recursive($array)
 
     $children = array();
     foreach($list as $name => &$node)
-        $children[] = map_sort_recursive($node); 
+        $children[] = map_sort_recursive($node);
 
     $array['children'] = $children;
     return $array;
