@@ -180,7 +180,7 @@ function getAncestors(node) {
 function initializeBreadcrumbTrail() {
   // Add the svg area.
   var trail = d3.select("#sequence").append("svg:svg")
-      .attr("width", width)
+      .attr("width", width*2)
       .attr("height", 50)
       .attr("id", "trail");
   // Add the label at the end, for the percentage.
