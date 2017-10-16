@@ -27,6 +27,7 @@ var y = d3.scale.sqrt()
 
 // Total size of all segments; we set this later, after loading the data.
 var totalSize = 0;
+var topLevel = {};
 
 var vis = d3.select("#chart").append("svg:svg")
     .attr("width", width)
@@ -69,7 +70,6 @@ var arc = d3.svg.arc()
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
       .style("fill", function(d) {
-          console.log(d.name, d.depth, d);
           return (d.depth>1) ? '#0B4C5F' : colors[d.name];
        })
       .style("opacity", 1)
@@ -82,26 +82,30 @@ var arc = d3.svg.arc()
   // Get total size of the tree = value of root node from partition.
   rootNode = path.node().__data__;
   totalSize = rootNode.value;
-  console.log(path.node().__data__);
+  topLevel= rootNode;
 
-  setPercentage(totalSize, "Total Binary Size");
+  setPercentage(topLevel.value, topLevel.name);
 
-  updateBreadcrumbs([rootNode], "");
+  updateBreadcrumbs([rootNode], "100%");
 })(null, mbed_map);
 
-// Fade all but the current sequence, and show it in the breadcrumb trail.
-function mouseover(d) {
-
-  var percentage = (100 * d.value / totalSize).toPrecision(3);
+function getPercentageString(val, tol) {
+  var percentage = (100 * val / tol).toPrecision(3);
   var percentageString = percentage + "%";
   if (percentage < 0.1) {
     percentageString = "< 0.1%";
   }
 
+  return percentageString;
+}
+
+// Fade all but the current sequence, and show it in the breadcrumb trail.
+function mouseover(d) {
   setPercentage(d.value, d.name);
 
   var sequenceArray = getAncestors(d);
-  updateBreadcrumbs(sequenceArray, percentageString);
+  var percentageStr = getPercentageString(d.value, totalSize);
+  updateBreadcrumbs(sequenceArray, percentageStr);
 
   // Fade all the segments.
   d3.selectAll("path")
@@ -134,9 +138,11 @@ function mouseleave(d) {
               d3.select(this).on("mouseover", mouseover);
             });
 
-  setPercentage(totalSize, "Total Binary Size");
+  setPercentage(topLevel.value, topLevel.name);
 
-  updateBreadcrumbs([getRoot(d)], "");
+  var sequenceArray = getAncestors(topLevel);
+  var percentageStr = getPercentageString(topLevel.value, totalSize);
+  updateBreadcrumbs(sequenceArray, percentageStr);
 }
 
 function setPercentage(size, name) {
@@ -287,4 +293,7 @@ function click(d) {
       })
     .selectAll("path")
       .attrTween("d", function(d) { return function() { return arc(d); }; });
+
+  topLevel = d;
+  setPercentage(topLevel.name, topLevel.value);
 }
