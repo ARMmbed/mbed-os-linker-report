@@ -1,14 +1,17 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 from subprocess import check_output
-import re
-from os import path
-import os, json
 from collections import OrderedDict
+from os import path
+import re, os, json
 
 # arm-none-eabi-nm needs to be in the environment path
 nm = "arm-none-eabi-nm"
 nm_opts = "-l -S -C -f sysv"
+default_datafile = "data-flare.js"
+repo_root = path.dirname(path.abspath(__file__))
+default_op = path.join(repo_root, "html", default_datafile)
 
 def add_node(root, node_path, node_size):
     node = root
@@ -65,14 +68,9 @@ def main(binaries, output):
 
 if __name__ == '__main__':
     import argparse, webbrowser
-    from os import path
 
     parser = argparse.ArgumentParser(
         description='Analyse binary built by gcc and generate json containing binary size information')
-
-    default_datafile = "data-flare.js"
-    repo_root = path.dirname(path.abspath(__file__))
-    default_op = path.join(repo_root, "html", default_datafile)
 
     def output_arg(s):
         if path.isdir(s):
@@ -92,16 +90,16 @@ if __name__ == '__main__':
     # get and validate arguments
     args = parser.parse_args()
 
-    # combine applicaiton and bootloader adding metadata info
+    # parse input and write to output
     main(args.binary, args.output)
 
     # close output file
     output_fn = path.abspath(args.output.name)
     args.output.close()
 
-    print("data written to", output_fn)
+    print("[INFO] data written to", output_fn)
 
     if args.browser:
         uri = "file://" + path.join(repo_root, "index.html")
-        print("opening in browser", uri)
+        print("[INFO] opening in browser", uri)
         webbrowser.open(uri, new=2)
