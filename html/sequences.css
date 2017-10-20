@@ -47,12 +47,11 @@ body {
 
 #explanation {
   position: absolute;
-  top: 360px;
   left: 570px;
   width: 140px;
   text-align: center;
   color: #666;
-  z-index: -1;
+  z-index: 99;
 }
 
 #percentage {

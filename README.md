@@ -1,4 +1,4 @@
-# d3.js based Binary Size Statistics
+# Binary Size Analysis
 This repository is used to generate interactive linker statistics. Please have a look at our [interactive example](https://armmbed.github.io/mbed-os-linker-report/).
 
 ## Installation

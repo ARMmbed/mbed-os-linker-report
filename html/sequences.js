@@ -1,5 +1,5 @@
 // Dimensions of sunburst.
-var width = 1280;
+var width = 1000;
 var height = 800;
 var radius = Math.min(width, height) / 2;
 
@@ -15,11 +15,19 @@ var colors = {
   ".uvisor.bss": "#de783b",
   ".uvisor.secure": "#6ab975",
   ".page_heap": "#a173d1",
-  ".text": "#bbbbbb"
+  ".text": "#bbbbbb",
+  "mbed": "#e0e0e0"
 };
+
+var x = d3.scale.linear()
+    .range([0, 2 * Math.PI]);
+
+var y = d3.scale.sqrt()
+    .range([0, radius]);
 
 // Total size of all segments; we set this later, after loading the data.
 var totalSize = 0;
+var topLevel = {};
 
 var vis = d3.select("#chart").append("svg:svg")
     .attr("width", width)
@@ -29,14 +37,13 @@ var vis = d3.select("#chart").append("svg:svg")
     .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
 var partition = d3.layout.partition()
-    .size([2 * Math.PI, radius * radius])
     .value(function(d) { return d.size; });
 
 var arc = d3.svg.arc()
-    .startAngle(function(d) { return d.x; })
-    .endAngle(function(d) { return d.x + d.dx; })
-    .innerRadius(function(d) { return Math.sqrt(d.y); })
-    .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
+    .startAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x))); })
+    .endAngle(function(d) { return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))); })
+    .innerRadius(function(d) { return Math.max(0, y(d.y)); })
+    .outerRadius(function(d) { return Math.max(0, y(d.y + d.dy)); });
 
 (function(error, json) {
   if (error) throw error;
@@ -54,48 +61,51 @@ var arc = d3.svg.arc()
   // For efficiency, filter nodes to keep only those large enough to see.
   var nodes = partition.nodes(json)
       .filter(function(d) {
-      return (d.dx > 0.005); // 0.005 radians = 0.29 degrees
+      return (Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx))) > 0.005); // 0.005 radians = 0.29 degrees
       });
 
   var path = vis.data([json]).selectAll("path")
       .data(nodes)
       .enter().append("svg:path")
-      .attr("display", function(d) { return d.depth ? null : "none"; })
       .attr("d", arc)
       .attr("fill-rule", "evenodd")
       .style("fill", function(d) {
-           return (d.depth>1) ? '#0B4C5F' : colors[d.name];
+          return (d.depth>1) ? '#0B4C5F' : colors[d.name];
        })
       .style("opacity", 1)
-      .on("mouseover", mouseover);
+      .on("mouseover", mouseover)
+      .on("click", click);
 
   // Add the mouseleave handler to the bounding circle.
   d3.select("#container").on("mouseleave", mouseleave);
 
   // Get total size of the tree = value of root node from partition.
-  totalSize = path.node().__data__.value;
+  rootNode = path.node().__data__;
+  totalSize = rootNode.value;
+  topLevel= rootNode;
+
+  setPercentage(topLevel.value, topLevel.name);
+
+  updateBreadcrumbs([rootNode], "100%");
 })(null, mbed_map);
 
-// Fade all but the current sequence, and show it in the breadcrumb trail.
-function mouseover(d) {
-
-  var percentage = (100 * d.value / totalSize).toPrecision(3);
+function getPercentageString(val, tol) {
+  var percentage = (100 * val / tol).toPrecision(3);
   var percentageString = percentage + "%";
   if (percentage < 0.1) {
     percentageString = "< 0.1%";
   }
 
-  d3.select("#percentage")
-      .text(d.value);
+  return percentageString;
+}
 
-  d3.select("#percentage_desc")
-      .text(d.name);
-
-  d3.select("#explanation")
-      .style("visibility", "");
+// Fade all but the current sequence, and show it in the breadcrumb trail.
+function mouseover(d) {
+  setPercentage(d.value, d.name);
 
   var sequenceArray = getAncestors(d);
-  updateBreadcrumbs(sequenceArray, percentageString);
+  var percentageStr = getPercentageString(d.value, totalSize);
+  updateBreadcrumbs(sequenceArray, percentageStr);
 
   // Fade all the segments.
   d3.selectAll("path")
@@ -128,8 +138,30 @@ function mouseleave(d) {
               d3.select(this).on("mouseover", mouseover);
             });
 
+  setPercentage(topLevel.value, topLevel.name);
+
+  var sequenceArray = getAncestors(topLevel);
+  var percentageStr = getPercentageString(topLevel.value, totalSize);
+  updateBreadcrumbs(sequenceArray, percentageStr);
+}
+
+function setPercentage(size, name) {
+  d3.select("#percentage")
+      .text(size);
+
+  d3.select("#percentage_desc")
+      .text(name);
+
   d3.select("#explanation")
-      .style("visibility", "hidden");
+      .style("visibility", "");
+}
+
+function getRoot(node) {
+  var current = node;
+  while (current.parent) {
+    current = current.parent;
+  }
+  return current;
 }
 
 // Given a node in a partition layout, return an array of all of its ancestor
@@ -141,13 +173,14 @@ function getAncestors(node) {
     path.unshift(current);
     current = current.parent;
   }
+  path.unshift(current);
   return path;
 }
 
 function initializeBreadcrumbTrail() {
   // Add the svg area.
   var trail = d3.select("#sequence").append("svg:svg")
-      .attr("width", width)
+      .attr("width", width*2)
       .attr("height", 50)
       .attr("id", "trail");
   // Add the label at the end, for the percentage.
@@ -247,4 +280,20 @@ function drawLegend() {
       .attr("dy", "0.35em")
       .attr("text-anchor", "middle")
       .text(function(d) { return d.key; });
+}
+
+function click(d) {
+  vis.transition()
+      .duration(750)
+      .tween("scale", function() {
+        var xd = d3.interpolate(x.domain(), [d.x, d.x + d.dx]),
+            yd = d3.interpolate(y.domain(), [d.y, 1]),
+            yr = d3.interpolate(y.range(), [d.y ? 20 : 0, radius]);
+        return function(t) { x.domain(xd(t)); y.domain(yd(t)).range(yr(t)); };
+      })
+    .selectAll("path")
+      .attrTween("d", function(d) { return function() { return arc(d); }; });
+
+  topLevel = d;
+  setPercentage(topLevel.name, topLevel.value);
 }
