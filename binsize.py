@@ -15,7 +15,7 @@ def main(output):
         print(line.strip())
 
         # filter for only relavent lines
-        if line.startswith('|') and "Subtotals" not in line and '| Module' not in line:
+        if line.startswith('|') and "Subtotals" not in line and '| Module' not in line and "---" not in line:
             # unpack the line
             l = line.strip().split('|')
             l = [x.strip() for x in l if x != '']
@@ -28,15 +28,15 @@ def main(output):
             # generate 3 nodes for each file: .text, .data, .bss
             nodes = []
 
-            text_size = int(text_size)
+            text_size = int(text_size.split("(")[0])
             if text_size > 0:
                 nodes.append((path.join('.text', obj_path), text_size))
 
-            data_size = int(data_size)
+            data_size = int(data_size.split("(")[0])
             if data_size > 0:
                 nodes.append((path.join('.data', obj_path), data_size))
 
-            bss_size = int(bss_size)
+            bss_size = int(bss_size.split("(")[0])
             if bss_size > 0:
                 nodes.append((path.join('.bss', obj_path), bss_size))
 
