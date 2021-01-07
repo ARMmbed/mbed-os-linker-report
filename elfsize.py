@@ -35,8 +35,8 @@ def output_to_file(fd, root):
     # write dict as json to output file
     s = json.dumps(dict(root), indent=4)
     fd.seek(0)
-    fd.write("var mbed_map = ")
-    fd.write(s)
+    fd.write(("var mbed_map = ").encode())
+    fd.write(s.encode())
     fd.truncate()
 
 def main(binaries, output):
@@ -45,7 +45,7 @@ def main(binaries, output):
         # run nm command on binary
         cmd = [nm] + nm_opts.split() + [binary]
         print(" ".join(cmd))
-        op += check_output(cmd).strip()
+        op += check_output(cmd).decode().strip()
 
     # parse output and store in dict
     root = OrderedDict({"name": "mbed", "children": []})
